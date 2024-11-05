@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sim Sim City</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+</head>
+<body>
+    <div class="game-container">
+        <div class="controls">
+            <button id='grass'>Grass ($10)</button>
+            <button id='tree'>Tree ($20)</button>
+            <button id='residential'>Residential Zone ($100)</button>
+            <button id='commercial'>Commercial Zone ($150)</button>
+            <button id='industrial'>Industrial Zone ($200)</button>
+            <button id='road'>Road ($50)</button>
+            <button id='power_line'>Power Line ($75)</button>
+            <button id='power_plant'>Power Plant ($1000)</button>
+            <button id='bulldoze'>Bulldoze</button>
+            
+            <div class="stats">
+                <p>Money: $<span id="money">10000</span></p>
+                <p>Population: <span id="population">0</span></p>
+                <p>Tax Income: $<span id="taxIncome">0</span>/turn</p>
+                <p id="turn">Turn: 0</p>
+                <button id="nextTurn">Next Turn</button>
+                <button id="reset"> Reset </button>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+    </div>
+
+    <script type="module" src="ts/index.ts"></script>
+</body>
+</html>

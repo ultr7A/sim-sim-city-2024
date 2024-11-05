@@ -1,0 +1,1 @@
+export type  CellType =  'void' | 'space' | 'star' | 'air' | 'cloud' | 'water' | 'dirt' | 'grass' | 'tree' | 'rock' | 'mountain' | 'residential' | 'commercial' | 'industrial' | 'road' | 'power_line' | 'power_plant' | 'cuteness' | 'existential_dread' | 'cosmic_horror' | 'comic_relief' 
