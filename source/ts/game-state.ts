@@ -3,6 +3,7 @@ import { Viewport } from "./viewport";
 import { drawGrid } from "./graphics";
 import { game_map_earth } from "./nature";
 import { CellType } from "./cell-type";
+import { calculateFinances } from "./game-state-finance";
 
 const viewport = new Viewport(SCREEN_SIZE[0],     SCREEN_SIZE[1], 
                               SCREEN_SIZE[0] * 4, SCREEN_SIZE[1] * 4, game_map_earth);
@@ -53,57 +54,7 @@ function updateStats() {
     (document.getElementById('population') as any).textContent = game.population;
 }
 
-function calculateTaxIncome(): number {
-    let income = 0;
 
-    for (let y = 0; y < MAP_SIZE[1]; y++) {
-        for (let x = 0; x < MAP_SIZE[0]; x++) {
-            const cell = game.map.data[y][x];
-
-            if (cell && cell.type !== 'road' && cell.type !== 'power_line') {
-                if      (cell.type === 'residential') { income += 10 * (cell.development / 10); }
-                else if (cell.type === 'commercial')  { income += 15 * (cell.development / 10); }
-                else if (cell.type === 'industrial')  { income += 20 * (cell.development / 10); }
-            }
-        }
-    }
-
-    
-    return Math.floor(income);
-}
-
-function calculateExpenses(): number {
-    let expenses = 0;
-
-    for (let y = 0; y < MAP_SIZE[1]; y++) {
-        for (let x = 0; x < MAP_SIZE[0]; x++) {
-            const cell = game.map.data[y][x];
-            
-            if (cell.type === 'road') {
-                expenses += 5; // Example cost for road maintenance
-            } else if (cell.type === 'power_line') {
-                expenses += 10; // Example cost for power line maintenance
-            }
-        }
-    }
-
-    return expenses;
-}
-
-/**
- * 
- * updates game stats
- * @returns available funds
- */
-function calculateFinances(openingBalance: number): number {
-    let income = calculateTaxIncome();
-    let expenses = calculateExpenses();
-
-    game.stats.income = income;
-    game.stats.expenses = expenses;
-
-    return openingBalance + income - expenses;
-}
 
 function updateLandValues() {
     for (let y = 0; y < MAP_SIZE[1]; y++) {
@@ -170,17 +121,15 @@ function updateDevelopment() {
                             const neighbor = game.map.data[y + dy][x + dx];
                             
                             if (neighbor.type === 'power_line') hasPower = true;
-                            if (neighbor.type === 'road') hasRoad = true;
+                            if (neighbor.type === 'road')       hasRoad = true;
 
                         }
                     }
                 }
 
                 if (hasPower && hasRoad) {
-                    
-
                     cell.development = Math.min(cell.development + 5, cell.landValue)
-                    cell.development  = Math.min(cell.development, 100);
+                    cell.development = Math.min(cell.development, 100);
                 }
             }
         }

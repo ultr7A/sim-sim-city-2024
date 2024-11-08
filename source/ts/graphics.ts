@@ -30,11 +30,10 @@ function hasAdjacentDevelopedZone(x: number, y: number) {
 
 export function drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElement) {
     //ctx.save();
-    console.log("drawing grid...")
     ctx.fillStyle = colors.void;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
    
-    let mode = 'land_value,development';
+    let mode = 'land_value';
 
     // ctx.translate(canvas.width / 2, 0);
     // ctx.transform(1, 0.5, -1, 0.5, 0, 0);
@@ -91,7 +90,7 @@ export function drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
             }
 
 
-            if (mode === 'land_value,development') {
+            if (mode.search('land_value') > -1) {
                 // render land value in white with black shadow
                 ctx.fillStyle = `rgba(255, 255, 255, 1)`;
                 ctx.shadowColor = 'black';
@@ -104,16 +103,42 @@ export function drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
                 ctx.textBaseline = 'top';
                 ctx.fillText((cell ? cell.landValue : 0).toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE);
 
+            } 
+
+            if (mode.search('development') > -1) {
                 // render development in orange-ish yellow
                 ctx.fillStyle = `rgba(255, 215, 0, 1)`
                 ctx.fillText(cell.development.toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE + 10);
+            }
 
+            if (mode.search('traffic') > -1) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${cell.traffic / 100})`;
+                ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+            
+                ctx.fillStyle = `rgba(255, 255, 255, 1)`;
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(cell.traffic.toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE);
+            }
+
+            if (mode.search('crime') > -1) {
+                ctx.fillStyle = `rgba(255, 50, 0, ${cell.crime / 100})`;
+                ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE+12, CELL_SIZE, CELL_SIZE);
+            
+                ctx.fillStyle = `rgba(255, 255, 255, 1)`;
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText(cell.crime.toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE);
+            }
+
+            if (mode.length) {
                 ctx.shadowBlur = 0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 0;
                 ctx.shadowColor = 'transparent';
-                continue;
-            } 
+            }
 
             
         }
