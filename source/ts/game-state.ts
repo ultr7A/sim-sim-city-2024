@@ -22,6 +22,10 @@ export class game {
     // game state:
     static money: number = 8000;
     static population: number = 0;
+    static stats = {
+        income: 0,
+        expenses: 0,
+    };
 
     // player state:
     static currentTool: CellType | "bulldoze" = 'dirt';
@@ -44,11 +48,12 @@ export class game {
 
 function updateStats() {
     (document.getElementById('money') as any).textContent = game.money;
+    (document.getElementById('expenses') as any).textContent = game.stats.expenses;
+    (document.getElementById('income') as any).textContent = game.stats.income;
     (document.getElementById('population') as any).textContent = game.population;
-    (document.getElementById('taxIncome') as any).textContent = calculateTaxIncome();
 }
 
-function calculateTaxIncome() {
+function calculateTaxIncome(): number {
     let income = 0;
 
     for (let y = 0; y < MAP_SIZE[1]; y++) {
@@ -67,6 +72,39 @@ function calculateTaxIncome() {
     return Math.floor(income);
 }
 
+function calculateExpenses(): number {
+    let expenses = 0;
+
+    for (let y = 0; y < MAP_SIZE[1]; y++) {
+        for (let x = 0; x < MAP_SIZE[0]; x++) {
+            const cell = game.map.data[y][x];
+            
+            if (cell.type === 'road') {
+                expenses += 5; // Example cost for road maintenance
+            } else if (cell.type === 'power_line') {
+                expenses += 10; // Example cost for power line maintenance
+            }
+        }
+    }
+
+    return expenses;
+}
+
+/**
+ * 
+ * updates game stats
+ * @returns available funds
+ */
+function calculateFinances(openingBalance: number): number {
+    let income = calculateTaxIncome();
+    let expenses = calculateExpenses();
+
+    game.stats.income = income;
+    game.stats.expenses = expenses;
+
+    return openingBalance + income - expenses;
+}
+
 function updateLandValues() {
     for (let y = 0; y < MAP_SIZE[1]; y++) {
         for (let x = 0; x < MAP_SIZE[0]; x++) {
@@ -75,7 +113,7 @@ function updateLandValues() {
             let value = 1;
             let hasRoad = false;
 
-            // Check for nearby roads and power lines
+            // Check for nearby roads and power lines using Cartesian distance
             for (let dy = -2; dy <= 2; dy++) {
                 for (let dx = -2; dx <= 2; dx++) {
                     if (y + dy >= 0 && y + dy < MAP_SIZE[1] && x + dx >= 0 && x + dx < MAP_SIZE[0]) {
@@ -83,18 +121,19 @@ function updateLandValues() {
                         
                         if (!other) continue;
                         
-                        
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+
                         if (other.type === 'power_line') {
-                            value += 1.5 / (Math.abs(dx) + Math.abs(dy));
+                            value += 1.5 / distance;
                         } else if (other.type === 'road') {
                             hasRoad = true;
-                            value += 4.6 / (Math.abs(dx) + Math.abs(dy));
+                            value += 4.6 / distance;
                         } else if (other.type === 'water') {
-                            value += 3.0 / (Math.abs(dx) + Math.abs(dy));
+                            value += 3.0 / distance;
                         } else if (other.type === 'tree') {
-                            value += 5.4 / (Math.abs(dx) + Math.abs(dy));
+                            value += 5.4 / distance;
                         } else if (other.type === 'grass') {
-                            value += 4.2 / (Math.abs(dx) + Math.abs(dy));
+                            value += 4.2 / distance;
                         }
                     }
                 }
@@ -104,10 +143,12 @@ function updateLandValues() {
                 value -= 5;
             }
 
-            if (cell.type === 'residential') {
-                value += 0.1;
-                console.log("land value", value);
-            }
+            // Update land value based on new attributes
+            value += cell.crime * -1;
+            value += cell.pollution * -2;
+            value += cell.traffic * -3;
+            value += cell.mystery * 0.5;
+            value += cell.cute * 2;
 
             cell.landValue = value;
         }
@@ -122,68 +163,38 @@ function updateDevelopment() {
             if (cell && cell.type !== 'road' && cell.type !== 'power_line') {
                 let hasPower = false;
                 let hasRoad = false;
-                let landValueFactors = 0;
-
-                for (let dy = -1; dy <= 1; dy++) {
-                    for (let dx = -1; dx <= 1; dx++) {
+                
+                for (let dy = -2; dy <= 2; dy++) {
+                    for (let dx = -2; dx <= 2; dx++) {
                         if (y + dy >= 0 && y + dy < MAP_SIZE[1] && x + dx >= 0 && x + dx < MAP_SIZE[0]) {
                             const neighbor = game.map.data[y + dy][x + dx];
                             
                             if (neighbor.type === 'power_line') hasPower = true;
+                            if (neighbor.type === 'road') hasRoad = true;
 
-                            if (neighbor.type === 'road') {  landValueFactors += 4;  hasRoad = true; }
-                            if (neighbor.type === 'grass') landValueFactors += 2;
-                            if (neighbor.type === 'tree') landValueFactors += 3;
-                            if (neighbor.type === 'water') landValueFactors += 5;
-                            
-                            if (cell.type === 'industrial') {
-                                if (neighbor.type === 'industrial') landValueFactors += 2;
-                                if (neighbor.type === 'cosmic_horror') landValueFactors += 10;
-                            }
-
-                            if (cell.type === 'residential') {
-                                if (neighbor.type === 'residential') landValueFactors += 2;
-                                if (neighbor.type === 'commercial') landValueFactors += 2;
-                                if (neighbor.type === 'industrial') landValueFactors -= 2;
-                            }
-                            
                         }
                     }
                 }
-                
-                
 
-                if (hasPower) {
+                if (hasPower && hasRoad) {
                     
 
-                    let expectedDevelopment = (Math.floor(cell.landValue) + landValueFactors * 5);
-
-                    if (!hasRoad) {
-                        expectedDevelopment -= 5;
-                    }
-
-
-                    if (cell.type === 'residential' || cell.type === 'commercial' || cell.type === 'industrial') {
-                        console.log(cell.type, { development: cell.development, landValue: cell.landValue, landValueFactors: landValueFactors });                        
-                        
-                        console.log(" cell developing by ", ((expectedDevelopment - cell.development) / 5));
-                    }
-
-                    cell.development = 33 + ((expectedDevelopment - cell.development) / 5);
+                    cell.development = Math.min(cell.development + 5, cell.landValue)
                     cell.development  = Math.min(cell.development, 100);
-                    
                 }
             }
         }
     }
 }
 
+
 function updateGame() {
     game.turn += 1;
 
     updateLandValues();
     updateDevelopment();
-    game.money += calculateTaxIncome();
+    game.money = calculateFinances(game.money);
+    game.updateStats();
 
     game.population = 0;
 

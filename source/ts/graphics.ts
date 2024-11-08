@@ -16,8 +16,7 @@ function hasAdjacentDevelopedZone(x: number, y: number) {
                 const cell = game.map.read(newX, newZ) // grid[newZ][newX];
                 
                 if (cell && 
-                    cell.type !== 'road' && 
-                    cell.type !== 'power_line' && 
+                    [ 'residential', 'commercial', 'industrial' ].includes(cell.type) &&
                     cell.development >= 50) {
                         console.log("developed cell: ", cell.type);
                     return true;
@@ -35,7 +34,8 @@ export function drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
     ctx.fillStyle = colors.void;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
    
-    
+    let mode = 'land_value,development';
+
     // ctx.translate(canvas.width / 2, 0);
     // ctx.transform(1, 0.5, -1, 0.5, 0, 0);
       
@@ -89,6 +89,33 @@ export function drawGrid(ctx: CanvasRenderingContext2D, canvas: HTMLCanvasElemen
                     y * CELL_SIZE + CELL_SIZE/2
                 );
             }
+
+
+            if (mode === 'land_value,development') {
+                // render land value in white with black shadow
+                ctx.fillStyle = `rgba(255, 255, 255, 1)`;
+                ctx.shadowColor = 'black';
+                ctx.shadowBlur = 2;
+                ctx.shadowOffsetX = 1;
+                ctx.shadowOffsetY = 1;
+
+                ctx.font = '10px Arial';
+                ctx.textAlign = 'left';
+                ctx.textBaseline = 'top';
+                ctx.fillText((cell ? cell.landValue : 0).toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE);
+
+                // render development in orange-ish yellow
+                ctx.fillStyle = `rgba(255, 215, 0, 1)`
+                ctx.fillText(cell.development.toFixed(3) + "", x * CELL_SIZE, y * CELL_SIZE + 10);
+
+                ctx.shadowBlur = 0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 0;
+                ctx.shadowColor = 'transparent';
+                continue;
+            } 
+
+            
         }
     }
     //ctx.restore();
