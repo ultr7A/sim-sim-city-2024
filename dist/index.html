@@ -2,27 +2,29 @@
 <html>
 <head>
     <title>Sim Sim City</title>
-  <script type="module" crossorigin src="/assets/index-BeW3pibq.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DimTQ-y9.css">
+  <script type="module" crossorigin src="./assets/index-C7PIHSP1.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-CDtymkTz.css">
 </head>
 <body>
     <div class="game-container">
         <div class="controls">
-            <h2>Controls</h2>
+            <button id='grass'>Grass ($10)</button>
+            <button id='tree'>Tree ($20)</button>
             <button id='residential'>Residential Zone ($100)</button>
             <button id='commercial'>Commercial Zone ($150)</button>
             <button id='industrial'>Industrial Zone ($200)</button>
             <button id='road'>Road ($50)</button>
-            <button id='power'>Power Line ($75)</button>
+            <button id='power_line'>Power Line ($75)</button>
+            <button id='power_plant'>Power Plant ($1000)</button>
             <button id='bulldoze'>Bulldoze</button>
             
             <div class="stats">
-                <h3>Statistics</h3>
                 <p>Money: $<span id="money">10000</span></p>
                 <p>Population: <span id="population">0</span></p>
                 <p>Tax Income: $<span id="taxIncome">0</span>/turn</p>
                 <p id="turn">Turn: 0</p>
                 <button id="nextTurn">Next Turn</button>
+                <button id="reset"> Reset </button>
             </div>
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
